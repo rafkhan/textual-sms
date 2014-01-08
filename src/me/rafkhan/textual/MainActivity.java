@@ -19,11 +19,6 @@ import android.widget.SimpleCursorAdapter;
 public class MainActivity extends Activity implements
 		LoaderManager.LoaderCallbacks<Cursor> {
 
-	// These are the Contacts rows that we will retrieve
-	private static final String[] sPROJECTION = new String[] { TextMessage.COL_MESSAGE };
-	// This is the select criteria
-	private static final String sSELECTION = "*";
-
 	private SimpleCursorAdapter mAdapter;
 
 	@Override
@@ -54,15 +49,14 @@ public class MainActivity extends Activity implements
 		 */
 
 		// For the cursor adapter, specify which columns go into which views
-		String[] fromColumns = { ConversationList.COL_MESSAGE };
-		int[] toViews = { android.R.id.text1 }; // The TextView in
-												// simple_list_item_1
+		String[] fromColumns = ConversationList.FIELDS;
+		int[] toViews = { R.id.cnv_list_id, R.id.cnv_list_sender,
+				R.id.cnv_list_msg, R.id.cnv_list_time, R.id.cnv_list_read };
 
 		// Create an empty adapter we will use to display the loaded data.
 		// We pass null for the cursor, then update it in onLoadFinished()
 		this.mAdapter = new SimpleCursorAdapter(this,
-				android.R.layout.simple_list_item_1, null, fromColumns,
-				toViews, 0);
+				R.layout.conversation_list_item, null, fromColumns, toViews, 0);
 
 		lv.setAdapter(this.mAdapter);
 		getLoaderManager().initLoader(0, null, this);
@@ -72,9 +66,7 @@ public class MainActivity extends Activity implements
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// TODO Auto-generated method stub
 		Uri cv = ConversationListProvider.URI_CONVERSATIONS;
-		Uri msg = TextMessageProvider.URI_MESSAGES;
-
-		return new CursorLoader(this, msg, sPROJECTION, sSELECTION, null, null);
+		return new CursorLoader(this, cv, ConversationList.FIELDS, "*", null, null);
 	}
 
 	@Override
