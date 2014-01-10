@@ -1,7 +1,10 @@
 package me.rafkhan.textual.data;
 
+import java.util.List;
+
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -25,9 +28,25 @@ public class TextMessageProvider extends ContentProvider {
 	public static final Uri URI_MESSAGES = Uri.parse(MESSAGES);
 	public static final String MESSAGES_BASE = MESSAGES + "/";
 
-	private DatabaseHandler database;
+	private static final UriMatcher sURIMatcher = new UriMatcher(
+			UriMatcher.NO_MATCH);
+	// Uri matcher IDs
+	public static final int MESSAGE_BY_SENDER = 0;
+
+	static {
+		sURIMatcher.addURI(AUTHORITY, "message/#", 0);
+	}
+
+	private DatabaseHandler mDatabase;
 
 	public TextMessageProvider() {
+	}
+
+	@Override
+	public boolean onCreate() {
+		// TODO: Implement this to initialize your content provider on startup.
+		this.mDatabase = new DatabaseHandler(this.getContext());
+		return false;
 	}
 
 	@Override
@@ -45,36 +64,55 @@ public class TextMessageProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		SQLiteDatabase db = this.database.getWritableDatabase();
+		SQLiteDatabase db = this.mDatabase.getWritableDatabase();
 		long id = db.insert(TextMessage.TABLE_NAME, null, values);
-		this.notifyProviderOnPersonChange();
+		this.notifyProviderOnMessageChange("");
 		return Uri.parse(MESSAGES_BASE + id);
-	}
-
-	@Override
-	public boolean onCreate() {
-		// TODO: Implement this to initialize your content provider on startup.
-		this.database = new DatabaseHandler(this.getContext());
-		return false;
 	}
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
 		Cursor result = null;
-		if (URI_MESSAGES.equals(uri)) {
-			result = DatabaseHandler
-					.getInstance(getContext())
-					.getReadableDatabase()
-					.query(TextMessage.TABLE_NAME, TextMessage.FIELDS, null,
-							null, null, null, null, null);
-			result.setNotificationUri(getContext().getContentResolver(),
-					URI_MESSAGES);
-		} else if (uri.toString().startsWith(MESSAGES_BASE)) {
-			Log.e(LOG, "Other URI that starts with authority");
-			throw new UnsupportedOperationException("Not yet implemented");
+
+		/*
+		 * if (URI_MESSAGES.equals(uri)) { result = DatabaseHandler
+		 * .getInstance(getContext()) .getReadableDatabase()
+		 * .query(TextMessage.TABLE_NAME, TextMessage.FIELDS, null, null, null,
+		 * null, null, null);
+		 * result.setNotificationUri(getContext().getContentResolver(),
+		 * URI_MESSAGES); } else if (uri.toString().startsWith(MESSAGES_BASE)) {
+		 * Log.e(LOG, "Other URI that starts with authority"); throw new
+		 * UnsupportedOperationException("Not yet implemented"); }
+		 */
+
+		int match = sURIMatcher.match(uri);
+		switch (match) {
+		case MESSAGE_BY_SENDER:
+			result = this.getMessagesBySender(uri);
+			
+			//TODO: REMOVE, SET NOTIFICATION URI IN GET MESSAGES BY SENDER
+			result.setNotificationUri(getContext().getContentResolver(), URI_MESSAGES);
+			return result;
 		}
 
+		return result;
+	}
+
+	private Cursor getMessagesBySender(Uri uri) {
+		Cursor result;
+		
+		List<String> pathseg = uri.getPathSegments();
+		Log.e(LOG, pathseg.toString());
+
+		String[] asd = {"123"};
+		
+		result = DatabaseHandler
+				.getInstance(getContext())
+				.getReadableDatabase()
+				.query(TextMessage.TABLE_NAME, TextMessage.FIELDS, "WHERE sender =\'?\' " , asd,
+						null, null, null, null);
+		
 		return result;
 	}
 
@@ -85,7 +123,10 @@ public class TextMessageProvider extends ContentProvider {
 		throw new UnsupportedOperationException("Not yet implemented");
 	}
 
-	public void notifyProviderOnPersonChange() {
+	public void notifyProviderOnMessageChange(String sender) {
+		/*
+		 * TODO: NOTIFICATION URIs
+		 */
 		getContext().getContentResolver().notifyChange(
 				TextMessageProvider.URI_MESSAGES, null, false);
 	}
