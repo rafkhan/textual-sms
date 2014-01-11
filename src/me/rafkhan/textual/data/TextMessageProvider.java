@@ -130,4 +130,13 @@ public class TextMessageProvider extends ContentProvider {
 		getContext().getContentResolver().notifyChange(
 				TextMessageProvider.URI_MESSAGES, null, false);
 	}
+	
+	/**
+	 * This queries the ConversationList content provider and
+	 * returns the sender of whatever ID initiated the conversation
+	 * activity
+	 */
+	private String getSenderByConversationId(long id) {
+		return null;
+	}
 }

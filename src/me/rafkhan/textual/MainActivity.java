@@ -4,15 +4,18 @@ import me.rafkhan.android.textual.R;
 import me.rafkhan.textual.data.ConversationList;
 import me.rafkhan.textual.data.ConversationListProvider;
 import me.rafkhan.textual.data.TextMessage;
-import me.rafkhan.textual.data.TextMessageProvider;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
@@ -26,7 +29,7 @@ public class MainActivity extends Activity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		setupTestList();
+		this.setupListView();
 	}
 
 	@Override
@@ -36,16 +39,15 @@ public class MainActivity extends Activity implements
 		return true;
 	}
 
-	public void setupTestList() {
+	public void setupListView() {
 		ListView lv = (ListView) this.findViewById(R.id.listView1);
 
 		/*
-		TextMessage tm = new TextMessage();
-		tm.sender = "6471231231";
-		tm.message = "okay!";
-		tm.timestamp = 12345678;
-		this.getContentResolver().insert(ConversationListProvider.URI_CONVERSATIONS,
-				tm.getContent());
+		 * TextMessage tm = new TextMessage(); tm.sender = "6471231231";
+		 * tm.message = "okay!"; tm.timestamp = 12345678;
+		 * this.getContentResolver
+		 * ().insert(ConversationListProvider.URI_CONVERSATIONS,
+		 * tm.getContent());
 		 */
 
 		// For the cursor adapter, specify which columns go into which views
@@ -59,6 +61,15 @@ public class MainActivity extends Activity implements
 				R.layout.conversation_list_item, null, fromColumns, toViews, 0);
 
 		lv.setAdapter(this.mAdapter);
+		lv.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Intent i = new Intent(parent.getContext(), ConversationActivity.class);
+				i.putExtra(TextMessage.COL_ID, id);
+				startActivity(i);
+			}
+		});
 		getLoaderManager().initLoader(0, null, this);
 	}
 
@@ -66,7 +77,8 @@ public class MainActivity extends Activity implements
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		// TODO Auto-generated method stub
 		Uri cv = ConversationListProvider.URI_CONVERSATIONS;
-		return new CursorLoader(this, cv, ConversationList.FIELDS, "*", null, null);
+		return new CursorLoader(this, cv, ConversationList.FIELDS, "*", null,
+				null);
 	}
 
 	@Override

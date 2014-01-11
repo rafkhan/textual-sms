@@ -1,8 +1,5 @@
-package me.rafkhan.textual;
+package me.rafkhan.textual.data;
 
-import me.rafkhan.textual.data.ConversationListProvider;
-import me.rafkhan.textual.data.TextMessage;
-import me.rafkhan.textual.data.TextMessageProvider;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
