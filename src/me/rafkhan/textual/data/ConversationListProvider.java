@@ -24,26 +24,31 @@ public class ConversationListProvider extends ContentProvider {
 	public static final String SCHEME = "content://";
 
 	// Use these for URI matching in query/getType
-	public static final String CONVERSATIONS = SCHEME + AUTHORITY
-			+ "/conversation";
+	public static final String CONVERSATIONS = SCHEME + AUTHORITY + "/";
 	public static final Uri URI_CONVERSATIONS = Uri.parse(CONVERSATIONS);
-	public static final String CONVERSATIONS_BASE = CONVERSATIONS + "/";
+	public static final String CONVERSATIONS_BASE = CONVERSATIONS + "/conversation/";
 
 	private static final UriMatcher sURIMatcher = new UriMatcher(
 			UriMatcher.NO_MATCH);
-	// Uri matcher IDs
-	public static final int ALL_CONVERSATIONS = 0;
+
+	/*
+	 * Sets up URI matchers
+	 */
+	private static final int ALL_CONVERSATIONS = 0;
+	private static final int SENDER_BY_ID = 1;
 
 	static {
-		sURIMatcher.addURI(AUTHORITY, "/", 0);
+		sURIMatcher.addURI(AUTHORITY, "", ALL_CONVERSATIONS);
+		sURIMatcher.addURI(AUTHORITY, "/sender_by_id/#", SENDER_BY_ID);
 	}
 
+	// I think I can delete this?
 	public ConversationListProvider() {
 	}
 
 	@Override
 	public boolean onCreate() {
-		// TODO: Implement this to initialize your content provider on startup.
+		// TODO: initialize stuff I guess?
 		return false;
 	}
 
@@ -56,26 +61,17 @@ public class ConversationListProvider extends ContentProvider {
 		switch (match) {
 		case ALL_CONVERSATIONS:
 			return this.queryAll();
+		case SENDER_BY_ID:
+
 		default:
-			Log.e(LOG, "Unmatched URI");
+			Log.e(LOG, "Unmatched URI: " + uri.toString());
+			Log.e(LOG, this.URI_CONVERSATIONS.toString());
 			throw new UnsupportedOperationException("Not yet implemented");
 		}
 	}
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
-		/*
-		 * String sender = values.getAsString(ConversationList.COL_SENDER);
-		 * String message = values.getAsString(ConversationList.COL_MESSAGE);
-		 * long timestamp = values.getAsLong(ConversationList.COL_TIMESTAMP);
-		 * boolean read = values.getAsBoolean(ConversationList.COL_READ);
-		 * 
-		 * String query = "INSERT INTO " + ConversationList.TABLE_NAME + "(" +
-		 * ConversationList.COL_SENDER + "," + ConversationList.COL_MESSAGE +
-		 * "," + ConversationList.COL_TIMESTAMP + ") VALUES (" + "\'" + sender
-		 * +"\'," + "\'" + message +"\'," + timestamp + ")";
-		 */
-
 		SQLiteDatabase db = DatabaseHandler.getInstance(getContext())
 				.getWritableDatabase();
 		String whereClause = ConversationList.COL_SENDER + " = \'"
@@ -111,8 +107,8 @@ public class ConversationListProvider extends ContentProvider {
 				ConversationListProvider.URI_CONVERSATIONS, null, false);
 	}
 
-	/*
-	 * Returns every entry in the database
+	/**
+	 * Returns every entry in the database Called by query()
 	 */
 	private Cursor queryAll() {
 		Cursor result = DatabaseHandler
@@ -124,5 +120,34 @@ public class ConversationListProvider extends ContentProvider {
 				URI_CONVERSATIONS);
 
 		return result;
+	}
+
+	/**
+	 * Returns the sender associated with the ID in the URI
+	 * 
+	 * TODO: Maybe move this function right into the activity
+	 */
+	private String senderById(Uri uri) {
+		String idStr = uri.getPathSegments().get(2);
+		String[] args = { idStr };
+
+		String[] projection = { ConversationList.COL_SENDER };
+
+		Cursor result = DatabaseHandler
+				.getInstance(getContext())
+				.getReadableDatabase()
+				.query(ConversationList.TABLE_NAME, projection,
+						"WHERE _id = ?", args, null, null, null);
+
+		if (result.moveToFirst()) {
+			String senderNum = result.getString(result
+					.getColumnIndex(ConversationList.COL_SENDER));
+			Log.e(LOG, senderNum);
+			return senderNum;
+		} else {
+			Log.e(LOG, "No sender by given id: " + idStr);
+		}
+		
+		return null;
 	}
 }

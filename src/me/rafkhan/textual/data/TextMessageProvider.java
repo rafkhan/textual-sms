@@ -28,8 +28,7 @@ public class TextMessageProvider extends ContentProvider {
 	public static final Uri URI_MESSAGES = Uri.parse(MESSAGES);
 	public static final String MESSAGES_BASE = MESSAGES + "/";
 
-	private static final UriMatcher sURIMatcher = new UriMatcher(
-			UriMatcher.NO_MATCH);
+	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 	// Uri matcher IDs
 	public static final int MESSAGE_BY_SENDER = 0;
 

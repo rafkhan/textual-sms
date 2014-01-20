@@ -29,7 +29,7 @@ public class MainActivity extends Activity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		this.setupListView();
+		//this.setupListView();
 	}
 
 	@Override
