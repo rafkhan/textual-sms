@@ -40,18 +40,6 @@
             android:enabled="true"
             android:exported="false" >
         </provider>
-        <provider
-            android:name="me.rafkhan.textual.data.ConversationListProvider"
-            android:authorities="me.rafkhan.textual.conversationlistprovider"
-            android:enabled="true"
-            android:exported="false" >
-        </provider>
-        <provider
-            android:name="me.rafkhan.textual.data.SmsProvider"
-            android:authorities="me.rafkhan.textual.provider"
-            android:enabled="true"
-            android:exported="true" >
-        </provider>
 
         <activity
             android:name="me.rafkhan.textual.data.test.ProviderTestActivity"

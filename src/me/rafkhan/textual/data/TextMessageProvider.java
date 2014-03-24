@@ -30,10 +30,12 @@ public class TextMessageProvider extends ContentProvider {
 
 	private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 	// Uri matcher IDs
-	public static final int MESSAGE_BY_SENDER = 0;
+	public static final int ALL_MESSAGES = 0;
+	public static final int MESSAGE_BY_SENDER = 1;
 
 	static {
-		sURIMatcher.addURI(AUTHORITY, "message/#", 0);
+		sURIMatcher.addURI(AUTHORITY, "", 0);
+		sURIMatcher.addURI(AUTHORITY, "message/#", 1);
 	}
 
 	private DatabaseHandler mDatabase;
@@ -63,6 +65,8 @@ public class TextMessageProvider extends ContentProvider {
 
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
+		Log.e("asd", "In insert");
+	
 		SQLiteDatabase db = this.mDatabase.getWritableDatabase();
 		long id = db.insert(TextMessage.TABLE_NAME, null, values);
 		this.notifyProviderOnMessageChange("");
@@ -74,26 +78,35 @@ public class TextMessageProvider extends ContentProvider {
 			String[] selectionArgs, String sortOrder) {
 		Cursor result = null;
 
-		/*
-		 * if (URI_MESSAGES.equals(uri)) { result = DatabaseHandler
-		 * .getInstance(getContext()) .getReadableDatabase()
-		 * .query(TextMessage.TABLE_NAME, TextMessage.FIELDS, null, null, null,
-		 * null, null, null);
-		 * result.setNotificationUri(getContext().getContentResolver(),
-		 * URI_MESSAGES); } else if (uri.toString().startsWith(MESSAGES_BASE)) {
-		 * Log.e(LOG, "Other URI that starts with authority"); throw new
-		 * UnsupportedOperationException("Not yet implemented"); }
-		 */
-
 		int match = sURIMatcher.match(uri);
 		switch (match) {
+		case ALL_MESSAGES:
+			result = getAllMessages();
+			
 		case MESSAGE_BY_SENDER:
-			result = this.getMessagesBySender(uri);
+			//result = this.getMessagesBySender(uri);
 			
 			//TODO: REMOVE, SET NOTIFICATION URI IN GET MESSAGES BY SENDER
-			result.setNotificationUri(getContext().getContentResolver(), URI_MESSAGES);
-			return result;
+			//result.setNotificationUri(getContext().getContentResolver(), URI_MESSAGES);
+			//return result;
+			
+			Log.e(LOG, "Message by sender: " + uri.toString());
+			break;
+			
+			
 		}
+		
+		return result;
+	}
+	
+	private Cursor getAllMessages() {
+		Cursor result = DatabaseHandler
+				.getInstance(getContext())
+				.getReadableDatabase()
+				.query(TextMessage.TABLE_NAME, TextMessage.FIELDS,
+						null, null, null, null, null, null);
+		result.setNotificationUri(getContext().getContentResolver(),
+				URI_MESSAGES);
 
 		return result;
 	}

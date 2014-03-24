@@ -27,9 +27,6 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
 
 				context.getContentResolver().insert(
 						TextMessageProvider.URI_MESSAGES, tm.getContent());
-				
-				context.getContentResolver().insert(
-						ConversationListProvider.URI_CONVERSATIONS, tm.getContent());
 			}
 		}
 	}
